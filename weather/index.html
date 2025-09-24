@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather App</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-400 via-indigo-300 to-blue-100 flex items-center justify-center min-h-screen">
+  <div class="max-w-sm w-full bg-white/90 rounded-2xl shadow-2xl p-8">
+    <h3 class="text-2xl font-extrabold text-center mb-6 text-indigo-700 tracking-wide">Weather App</h3>
+    <form id="weather-form" class="flex gap-2 mb-6">
+      <input type="text" id="city" class="flex-1 p-3 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-500 transition" placeholder="Enter city name (e.g. Lahore,PK)" required>
+      <button type="submit" class="bg-indigo-600 text-white px-5 rounded-lg font-semibold shadow hover:bg-indigo-700 transition">Get</button>
+    </form>
+    <div id="result" class="text-center mt-4"></div>
+  </div>
+  <script>
+    document.getElementById('weather-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const city = document.getElementById('city').value.trim();
+      const apiKey = "b9fa20be5e4bb09305fbc0202df0a6f8";
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = `<div class="animate-pulse text-indigo-500 font-semibold">Loading...</div>`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.cod === 200) {
+          resultDiv.innerHTML = `
+            <div class="text-xl font-bold text-indigo-700 mb-2">${data.name}, ${data.sys.country}</div>
+            <div class="flex flex-col items-center">
+              <div class="bg-indigo-100 rounded-full p-3 shadow mb-2">
+                <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="icon" class="w-16 h-16">
+              </div>
+              <div class="text-4xl font-extrabold text-indigo-700 mb-1">${data.main.temp}°C</div>
+              <div class="text-base text-slate-700 mb-2">${data.weather[0].main} <span class="text-xs text-slate-500">(${data.weather[0].description})</span></div>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="bg-blue-100 rounded-lg p-2">Humidity: <span class="font-semibold">${data.main.humidity}%</span></div>
+              <div class="bg-blue-100 rounded-lg p-2">Wind: <span class="font-semibold">${data.wind.speed} m/s</span></div>
+              <div class="bg-blue-100 rounded-lg p-2">Min: <span class="font-semibold">${data.main.temp_min}°C</span></div>
+              <div class="bg-blue-100 rounded-lg p-2">Max: <span class="font-semibold">${data.main.temp_max}°C</span></div>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="bg-red-100 text-red-700 rounded-lg p-3 font-semibold animate-bounce">City not found!</div>`;
+        }
+      } catch {
+        resultDiv.innerHTML = `<div class="bg-red-100 text-red-700 rounded-lg p-3 font-semibold animate-bounce">Error fetching weather!</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
