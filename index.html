@@ -701,8 +701,6 @@
       };
       
       try {
-        console.log('Sending data:', formData); // Debug log
-        
         const response = await fetch('https://portfolio-backend-production-712c.up.railway.app/api/contact', {
           method: 'POST',
           headers: {
@@ -712,11 +710,7 @@
           body: JSON.stringify(formData)
         });
         
-        console.log('Response status:', response.status); // Debug log
-        console.log('Response headers:', response.headers); // Debug log
-        
         const result = await response.json();
-        console.log('Response data:', result); // Debug log
         
         if (response.ok) {
           successMessage.classList.remove('hidden');
@@ -726,7 +720,6 @@
           throw new Error(result.message || 'Something went wrong');
         }
       } catch (error) {
-        console.error('Complete Error:', error); // Debug log
         errorMessage.textContent = `Network Error: ${error.message}`;
         errorMessage.classList.remove('hidden');
       } finally {
