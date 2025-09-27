@@ -490,7 +490,7 @@
           <p class="mt-2 text-slate-600">A simple JS calculator for basic arithmetic. Good to show beginner JS skills.</p>
           <div class="mt-4 flex gap-2">
             <a href="calculator/index.html" target="_blank" class="text-indigo-600 text-sm hover:underline">Live →</a>
-            <a href="#" class="text-slate-500 text-sm">GitHub</a>
+            <a href="https://github.com/IbtisamAkhtar/portfolio/tree/main/calculator" target="_blank" class="text-slate-500 text-sm">GitHub</a>
           </div>
         </div>
         <!-- Weather App Card -->
@@ -499,7 +499,7 @@
           <p class="mt-2 text-slate-600">A stylish weather app using OpenWeatherMap API. Shows temperature, humidity, wind speed, and more.</p>
           <div class="mt-4 flex gap-2">
             <a href="weather/index.html" target="_blank" class="text-indigo-600 text-sm hover:underline">Live →</a>
-            <a href="#" class="text-slate-500 text-sm">GitHub</a>
+            <a href="https://github.com/IbtisamAkhtar/portfolio/tree/main/weather" target="_blank" class="text-slate-500 text-sm">GitHub</a>
           </div>
         </div>
       </div>
@@ -518,7 +518,7 @@
 
         <div class="mt-4 space-y-3">
           <div class="flex items-center gap-3">
-            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             <div>
               <div class="text-sm text-slate-500">Email</div>
               <a href="mailto:akhteribtisam@gmail.com" class="text-indigo-600 font-medium">akhteribtisam@gmail.com</a>
@@ -703,7 +703,7 @@
       try {
         console.log('Sending data:', formData); // Debug log
         
-        const response = await fetch('http://localhost:8080/contact.php', {
+        const response = await fetch('https://portfolio-backend-production-712c.up.railway.app/api/contact', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
