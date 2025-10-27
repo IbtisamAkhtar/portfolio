@@ -1,0 +1,12 @@
+{
+  "name": "portfolio-vercel-api",
+  "version": "1.0.0",
+  "description": "Small Vercel serverless API to accept contact form submissions and write to PlanetScale (MySQL)",
+  "main": "api/contact.js",
+  "scripts": {
+    "start": "node api/contact.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.3.0"
+  }
+}
