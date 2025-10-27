@@ -627,10 +627,20 @@
           throw new Error(response.statusText || 'Something went wrong');
         }
       } catch (error) {
-        errorMessage.textContent = `Network Error: ${error.message}`;
+        // Show network error to the user
+        errorMessage.textContent = `Network Error: ${error.message || 'Something went wrong'}`;
         errorMessage.classList.remove('hidden');
+
         // Show mailto fallback so the user can still send message
         try { document.getElementById('mailtoFallback').classList.remove('hidden'); } catch(e) {}
+
+        // Safety fallback: submit the native form so Netlify receives the submission
+        try {
+          // slight delay so the error message is visible before navigation
+          setTimeout(() => { form.submit(); }, 300);
+        } catch (e) {
+          console.warn('Native form submit failed:', e);
+        }
       } finally {
         // Reset button state
         btnText.classList.remove('hidden');
