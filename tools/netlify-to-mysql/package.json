@@ -1,0 +1,14 @@
+{
+  "name": "netlify-to-mysql",
+  "version": "1.0.0",
+  "description": "Import Netlify Forms CSV into a MySQL (Laravel) database",
+  "main": "import_netlify_csv.js",
+  "scripts": {
+    "start": "node import_netlify_csv.js"
+  },
+  "dependencies": {
+    "csv-parse": "^5.3.8",
+    "dotenv": "^16.0.3",
+    "mysql2": "^3.3.3"
+  }
+}
