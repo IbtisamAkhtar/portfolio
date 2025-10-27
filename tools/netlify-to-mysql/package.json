@@ -4,7 +4,8 @@
   "description": "Import Netlify Forms CSV into a MySQL (Laravel) database",
   "main": "import_netlify_csv.js",
   "scripts": {
-    "start": "node import_netlify_csv.js"
+    "start": "node import_netlify_csv.js",
+    "dry": "node import_netlify_csv.js --dry-run"
   },
   "dependencies": {
     "csv-parse": "^5.3.8",

@@ -6,17 +6,40 @@
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
+#!/usr/bin/env node
+
+// import_netlify_csv.js
+// Usage:
+//   node import_netlify_csv.js [--dry-run] [--limit=N] path/to/netlify.csv
+// Examples:
+//   node import_netlify_csv.js D:\downloads\netlify.csv
+//   node import_netlify_csv.js --dry-run --limit=10 D:\downloads\netlify.csv
+
+const fs = require('fs');
+const path = require('path');
+const { parse } = require('csv-parse/sync');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+function parseArgs(argv) {
+  const opts = { dryRun: false, limit: null, csvPath: null };
+  for (const a of argv) {
+    if (a === '--dry-run' || a === '--dryrun') opts.dryRun = true;
+    else if (a.startsWith('--limit=')) opts.limit = Number(a.split('=')[1]) || null;
+    else if (!a.startsWith('--') && !opts.csvPath) opts.csvPath = a;
+  }
+  return opts;
+}
+
 async function main() {
   const argv = process.argv.slice(2);
-  if (argv.length < 1) {
-    console.error('Usage: node import_netlify_csv_clean.js <path-to-netlify-csv>');
+  const opts = parseArgs(argv);
+  if (!opts.csvPath) {
+    console.error('Usage: node import_netlify_csv.js [--dry-run] [--limit=N] path/to/netlify.csv');
     process.exit(1);
   }
 
-  const csvPath = path.resolve(argv[0]);
+  const csvPath = path.resolve(opts.csvPath);
   if (!fs.existsSync(csvPath)) {
     console.error('CSV file not found:', csvPath);
     process.exit(1);
@@ -25,25 +48,6 @@ async function main() {
   const raw = fs.readFileSync(csvPath, 'utf8');
   const records = parse(raw, { columns: true, skip_empty_lines: true });
   console.log(`Parsed ${records.length} rows from CSV`);
-
-  const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || process.env.USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'database',
-    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined,
-  };
-
-  console.log('Connecting to MySQL host', dbConfig.host, 'database', dbConfig.database);
-
-  let pool;
-  try {
-    pool = await mysql.createPool({ ...dbConfig, waitForConnections: true, connectionLimit: 5 });
-  } catch (err) {
-    console.error('MySQL connection failed:', err.message || err);
-    process.exit(1);
-  }
 
   // Determine mapping from CSV columns to our table columns.
   const sample = records[0] || {};
@@ -68,36 +72,73 @@ async function main() {
 
   console.log('Using mapping -> name:', nameCol, 'email:', emailCol, 'message:', messageCol, 'date:', dateCol);
 
-  const insertSql = `INSERT INTO contact_messages (name, email, message, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`;
-
-  let inserted = 0;
-  for (const row of records) {
-    const name = nameCol ? (row[nameCol] || '').trim() : '';
-    const email = emailCol ? (row[emailCol] || '').trim() : '';
-    const message = messageCol ? (row[messageCol] || '').trim() : '';
-    let createdAt = dateCol ? (row[dateCol] || '') : '';
-
-    if (!createdAt) {
-      createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    } else {
-      const dt = new Date(createdAt);
-      if (!isNaN(dt.getTime())) {
-        createdAt = dt.toISOString().slice(0, 19).replace('T', ' ');
-      } else {
-        createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  // If dry-run mode, just print a preview and exit
+  if (opts.dryRun) {
+    const previewCount = opts.limit || Math.min(10, records.length);
+    console.log(`DRY RUN: showing first ${previewCount} parsed rows as they would be inserted:`);
+    for (let i = 0; i < previewCount; i++) {
+      const row = records[i];
+      const name = nameCol ? (row[nameCol] || '').trim() : '';
+      const email = emailCol ? (row[emailCol] || '').trim() : '';
+      const message = messageCol ? (row[messageCol] || '').trim() : '';
+      let createdAt = dateCol ? (row[dateCol] || '') : '';
+      if (!createdAt) createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      else {
+        const dt = new Date(createdAt);
+        if (!isNaN(dt.getTime())) createdAt = dt.toISOString().slice(0, 19).replace('T', ' ');
+        else createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
       }
+      console.log(i + 1, { name, email, message, createdAt });
     }
-
-    try {
-      await pool.execute(insertSql, [name, email, message, createdAt, createdAt]);
-      inserted++;
-    } catch (err) {
-      console.error('Insert failed for row:', row, err.message || err);
-    }
+    console.log('DRY RUN complete. No data was written.');
+    process.exit(0);
   }
 
-  console.log(`Imported ${inserted} rows into contact_messages`);
-  process.exit(0);
-}
+  // Not a dry run: connect to DB and insert
+  const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || process.env.USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'database',
+    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined,
+  };
 
-main().catch(err => { console.error(err); process.exit(1); });
+  console.log('Connecting to MySQL host', dbConfig.host, 'database', dbConfig.database);
+
+  let pool;
+  try {
+    pool = await mysql.createPool({ ...dbConfig, waitForConnections: true, connectionLimit: 5 });
+  #!/usr/bin/env node
+
+  // import_netlify_csv.js
+  // Usage:
+  //   node import_netlify_csv.js [--dry-run] [--limit=N] path/to/netlify.csv
+  // Examples:
+  //   node import_netlify_csv.js D:\downloads\netlify.csv
+  //   node import_netlify_csv.js --dry-run --limit=10 D:\downloads\netlify.csv
+
+  const fs = require('fs');
+  const path = require('path');
+  const { parse } = require('csv-parse/sync');
+  const mysql = require('mysql2/promise');
+  require('dotenv').config();
+
+  function parseArgs(argv) {
+    const opts = { dryRun: false, limit: null, csvPath: null };
+    for (const a of argv) {
+      if (a === '--dry-run' || a === '--dryrun') opts.dryRun = true;
+      else if (a.startsWith('--limit=')) opts.limit = Number(a.split('=')[1]) || null;
+      else if (!a.startsWith('--') && !opts.csvPath) opts.csvPath = a;
+    }
+    return opts;
+  }
+
+  async function main() {
+    const argv = process.argv.slice(2);
+    const opts = parseArgs(argv);
+    if (!opts.csvPath) {
+      console.error('Usage: node import_netlify_csv.js [--dry-run] [--limit=N] path/to/netlify.csv');
+      process.exit(1);
+    }
+
